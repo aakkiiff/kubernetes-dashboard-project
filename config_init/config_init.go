@@ -3,9 +3,11 @@ package configinit
 import (
 	"flag"
 	"log"
+	"os"
 	"sync"
 
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -14,22 +16,18 @@ var (
 	once      sync.Once
 )
 
-// Intt initializes the Kubernetes client only once
 func Initialize_config() *kubernetes.Clientset {
 	once.Do(func() {
-		// Define the flag for kubeconfig
-		kubeconfig := flag.String("kubeconfig", "/home/akif/.kube/config", "location to your kubeconfig file")
-
-		// Parse the command-line flags
-		flag.Parse()
-
-		// Build the Kubernetes config using the provided kubeconfig path
-		config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+		config, err := rest.InClusterConfig()
 		if err != nil {
-			log.Fatalf("Error building kubeconfig: %v", err)
-		}
+			kubeconfig := flag.String("kubeconfig", os.Getenv("HOME")+"/.kube/config", "absolute path to the kubeconfig file")
+			flag.Parse()
 
-		// Create a Kubernetes client from the config
+			config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
+			if err != nil {
+				log.Fatalf("Error building kubeconfig: %v", err)
+			}
+		}
 		clientset, err = kubernetes.NewForConfig(config)
 		if err != nil {
 			log.Fatalf("Error creating Kubernetes client: %v", err)

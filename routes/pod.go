@@ -28,6 +28,26 @@ func getPods(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"namespace": ns, "pods": podNames})
 }
+func getPod(c *gin.Context) {
+	ns := c.Param("ns")
+	pod := c.Param("pod")
+
+	// Get the Kubernetes clientset
+	clientset := configinit.Initialize_config()
+
+	// // Create the Pod in the specified namespace
+	pods, err := clientset.CoreV1().Pods(ns).Get(context.Background(), pod, v1.GetOptions{})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "could not get the pods", "error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "pod retrieved successfully",
+		"pod": map[string]string{
+			"name":      pods.Name,
+			"namespace": pods.Namespace,
+		},
+	})
+}
 
 func createPod(c *gin.Context) {
 	// Bind the JSON body to the Pod struct
@@ -74,6 +94,37 @@ func createPod(c *gin.Context) {
 			"containerImage": createdPod.Spec.Containers[0].Image,
 		},
 	})
+}
+
+func updatePodImage(c *gin.Context) {
+	var podModel models.Pod
+	err := c.ShouldBindJSON(&podModel)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request", "error": err.Error()})
+		return
+	}
+
+	// Get the Kubernetes clientset
+	clientset := configinit.Initialize_config()
+
+	// Fetch the existing Pod
+	existingPod, err := clientset.CoreV1().Pods(podModel.NamespaceName).Get(context.Background(), podModel.Name, v1.GetOptions{})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "could not get the pod", "error": err.Error()})
+		return
+	}
+
+	existingPod.Spec.Containers[0].Image = podModel.Image
+
+	// Update the Pod
+	_, err = clientset.CoreV1().Pods(podModel.NamespaceName).Update(context.Background(), existingPod, v1.UpdateOptions{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the pod", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pod updated successfully"})
 }
 
 func deletePod(c *gin.Context) {

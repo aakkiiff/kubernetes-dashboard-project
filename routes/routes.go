@@ -10,7 +10,9 @@ func RegisterRoutes(server *gin.Engine) {
 	server.DELETE("/namespace", deleteNamespace)
 
 	server.GET("/pods/:ns", getPods)
+	server.GET("/pod/:ns/:pod", getPod)
 	server.POST("/pod", createPod)
 	server.DELETE("/pod", deletePod)
+	server.PUT("/pod", updatePodImage)
 
 }

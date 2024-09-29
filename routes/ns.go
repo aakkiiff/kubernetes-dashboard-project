@@ -18,6 +18,7 @@ func getNamespaces(c *gin.Context) {
 	namespaces, err := configinit.Initialize_config().CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
 	if err != nil {
 		fmt.Println("can not list namespace names", err.Error())
+		return
 	}
 	for _, ns := range namespaces.Items {
 		namespaceNames = append(namespaceNames, ns.Name)
@@ -30,6 +31,7 @@ func createNamespace(c *gin.Context) {
 	err := c.ShouldBindJSON(&namespaceName)
 	if err != nil {
 		c.JSON(400, gin.H{"message": "invalid request", "error": err.Error()})
+		return
 	}
 
 	// config_init := configinit.Initialize_config()
@@ -42,6 +44,7 @@ func createNamespace(c *gin.Context) {
 	_, err = configinit.Initialize_config().CoreV1().Namespaces().Create(context.Background(), nsName, v1.CreateOptions{})
 	if err != nil {
 		c.JSON(400, gin.H{"message": "could not create ns", "error": err.Error()})
+		return
 	}
 	c.JSON(200, gin.H{"message": "namespace " + namespaceName.Name + " created successfully"})
 }
@@ -51,11 +54,13 @@ func deleteNamespace(c *gin.Context) {
 	err := c.ShouldBindJSON(&namespaceName)
 	if err != nil {
 		c.JSON(400, gin.H{"message": "invalid request", "error": err.Error()})
+		return
 	}
 	// fmt.Println(namespaceName.Name)
 	err = configinit.Initialize_config().CoreV1().Namespaces().Delete(context.Background(), namespaceName.Name, v1.DeleteOptions{})
 	if err != nil {
 		c.JSON(400, gin.H{"message": "invalid request, could not delete the namespace", "error": err.Error()})
+		return
 	}
 	c.JSON(200, gin.H{"message": "namespace " + namespaceName.Name + " deleted successfully"})
 

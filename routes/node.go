@@ -14,6 +14,7 @@ func getNodes(c *gin.Context) {
 	nodes, err := configinit.Initialize_config().CoreV1().Nodes().List(context.Background(), v1.ListOptions{})
 	if err != nil {
 		fmt.Println("can not list node names", err.Error())
+		return
 	}
 	for _, nodes := range nodes.Items {
 		// fmt.Println(nodes.Name)

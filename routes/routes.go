@@ -15,4 +15,5 @@ func RegisterRoutes(server *gin.Engine) {
 	server.DELETE("/pod", deletePod)
 	server.PUT("/pod", updatePodImage)
 
+	server.POST("/app", createApp)
 }

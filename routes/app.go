@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,73 +20,10 @@ func stringPtr(s string) *string {
 }
 func int32Ptr(i int32) *int32 { return &i }
 
-func updateApp(c *gin.Context) {
-	var appModel models.App
-	err := c.ShouldBindJSON(&appModel)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request", "error": err.Error()})
-		return
-	}
-
-	NamespaceName := appModel.Name + "-ns"
-	clientset := configinit.Initialize_config()
-
-	_, err = clientset.CoreV1().Namespaces().Get(context.Background(), NamespaceName, v1.GetOptions{})
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "application do not exist! Please create an application first")
-		return
-	}
-
-	pod, err := clientset.CoreV1().Pods(NamespaceName).Get(context.Background(), appModel.Name, v1.GetOptions{})
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "pod do not exist! Someone might have deleted it! Please re-apply the application first")
-		return
-	}
-	service, err := clientset.CoreV1().Services(NamespaceName).Get(context.Background(), appModel.Name, v1.GetOptions{})
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "service do not exist! Someone might have deleted it! Please re-apply the application first")
-		return
-	}
-	_, err = clientset.NetworkingV1().Ingresses(NamespaceName).Get(context.Background(), appModel.Name+"-ingress", v1.GetOptions{})
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "ingress do not exist! Someone might have deleted it! Please re-apply the application first")
-		return
-	}
-	fmt.Println("new:", appModel.Image+" old:", pod.Spec.Containers[0].Image)
-	if appModel.Image != pod.Spec.Containers[0].Image {
-		pod.Spec.Containers[0].Image = appModel.Image
-
-		_, err = clientset.CoreV1().Pods(NamespaceName).Update(context.Background(), pod, v1.UpdateOptions{})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the pod", "error": err.Error()})
-			return
-		}
-	}
-
-	if appModel.ContainerPort != int(pod.Spec.Containers[0].Ports[0].ContainerPort) {
-		// fmt.Println(pod.Spec.Containers[0].Ports[0].ContainerPort," ", int32(appModel.ContainerPort))
-		pod.Spec.Containers[0].Ports[0].ContainerPort = int32(appModel.ContainerPort)
-		service.Spec.Ports[0].Port = int32(appModel.ContainerPort)
-		_, err = clientset.CoreV1().Pods(NamespaceName).Update(context.Background(), pod, v1.UpdateOptions{})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the pod", "error": err.Error()})
-			return
-		}
-		// _, err = clientset.CoreV1().Services(NamespaceName).Update(context.Background(), service, v1.UpdateOptions{})
-		// if err != nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the service", "error": err.Error()})
-		// 	return
-		// }
-	}
-
-}
-
 func createApp(c *gin.Context) {
 	var appModel models.App
 
 	namespaceCreationStatus := "namespace created"
-	// podCreationStatus := "pod created"
 	deploymentCreationStatus := "deployment created"
 	serviceCreationStatus := "service created"
 	ingressCreationStatus := "ingress created"
@@ -299,4 +235,93 @@ func createApp(c *gin.Context) {
 			"ingress":         appModel.Name + "-ingress",
 		},
 	})
+}
+
+func updateApp(c *gin.Context) {
+	var appModel models.App
+	status := "no updates!"
+	err := c.ShouldBindJSON(&appModel)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request", "error": err.Error()})
+		return
+	}
+
+	NamespaceName := appModel.Name + "-ns"
+	clientset := configinit.Initialize_config()
+
+	_, err = clientset.CoreV1().Namespaces().Get(context.Background(), NamespaceName, v1.GetOptions{})
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "application do not exist! Please create an application first")
+		return
+	}
+
+	// pod, err := clientset.CoreV1().Pods(NamespaceName).Get(context.Background(), appModel.Name, v1.GetOptions{})
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, "pod do not exist! Someone might have deleted it! Please re-apply the application first")
+	// 	return
+	// }
+
+	deployment, err := clientset.AppsV1().Deployments(NamespaceName).Get(context.Background(), appModel.Name, v1.GetOptions{})
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "deployment do not exist! Someone might have deleted it! Please re-apply the application first")
+		return
+	}
+
+	service, err := clientset.CoreV1().Services(NamespaceName).Get(context.Background(), appModel.Name, v1.GetOptions{})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "service do not exist! Someone might have deleted it! Please re-apply the application first")
+		return
+	}
+
+	_, err = clientset.NetworkingV1().Ingresses(NamespaceName).Get(context.Background(), appModel.Name+"-ingress", v1.GetOptions{})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "ingress do not exist! Someone might have deleted it! Please re-apply the application first")
+		return
+	}
+
+	if appModel.Image != deployment.Spec.Template.Spec.Containers[0].Image {
+		deployment.Spec.Template.Spec.Containers[0].Image = appModel.Image
+
+		_, err = clientset.AppsV1().Deployments(NamespaceName).Update(context.Background(), deployment, v1.UpdateOptions{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the deployment", "error": err.Error()})
+			return
+		}
+		status = "application image updated!"
+
+	}
+
+	if appModel.ContainerPort != int(deployment.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort) {
+
+		deployment, err := clientset.AppsV1().Deployments(NamespaceName).Get(context.Background(), appModel.Name, v1.GetOptions{})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "deployment do not exist! Someone might have deleted it! Please re-apply the application first")
+			return
+		}
+
+		deployment.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort = int32(appModel.ContainerPort)
+		service.Spec.Ports[0].Port = int32(appModel.ContainerPort)
+
+		_, err = clientset.AppsV1().Deployments(NamespaceName).Update(context.Background(), deployment, v1.UpdateOptions{})
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the deployment", "error": err.Error()})
+			return
+		}
+
+		_, err = clientset.CoreV1().Services(NamespaceName).Update(context.Background(), service, v1.UpdateOptions{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the service", "error": err.Error()})
+			return
+		}
+
+		if status == "application image updated!" {
+			status = "application image & port updated!"
+		} else {
+			status = "application port updated"
+		}
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": status})
 }

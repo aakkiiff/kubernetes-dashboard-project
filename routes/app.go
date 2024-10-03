@@ -92,6 +92,7 @@ func createApp(c *gin.Context) {
 							Image: appModel.Image,
 							Ports: []corev1.ContainerPort{
 								{
+									Name:          appModel.Name,
 									ContainerPort: int32(appModel.ContainerPort),
 								},
 							},
@@ -139,9 +140,9 @@ func createApp(c *gin.Context) {
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
 								{
-									Path: "/" + appModel.Name,
+									Path: "/" + appModel.Name + "/?(.*)",
 									PathType: func() *networkingv1.PathType {
-										pathType := networkingv1.PathTypePrefix
+										pathType := networkingv1.PathTypeImplementationSpecific
 										return &pathType
 									}(),
 									Backend: networkingv1.IngressBackend{
@@ -302,7 +303,7 @@ func updateApp(c *gin.Context) {
 		}
 
 		deployment.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort = int32(appModel.ContainerPort)
-		service.Spec.Ports[0].Port = int32(appModel.ContainerPort)
+		service.Spec.Ports[0].TargetPort = intstr.FromInt(appModel.ContainerPort)
 
 		_, err = clientset.AppsV1().Deployments(NamespaceName).Update(context.Background(), deployment, v1.UpdateOptions{})
 

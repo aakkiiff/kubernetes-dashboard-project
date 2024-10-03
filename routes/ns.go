@@ -69,7 +69,7 @@ func deleteNamespace(c *gin.Context) {
 
 }
 
-func CheckNamespaceExists(namespace string) bool {
+func CheckNamespaceReady(namespace string) bool {
 	retries := 5
 	delay := 1*time.Second
 	clientset := configinit.Initialize_config()

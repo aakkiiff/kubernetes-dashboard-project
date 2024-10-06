@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin" // Import corev1 for Namespace
+	"github.com/gin-gonic/gin" 
 	"kubernetes-api.com/routes"
 )
 

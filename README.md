@@ -1,5 +1,3 @@
-# kubernetes-crud-api
-
 # Kubernetes API Project
 
 ## Overview
@@ -42,4 +40,4 @@ This project is a RESTful API built with Go and Gin, designed to interact with K
 3. **Access the API**: The API will be running on `http://localhost:8080`. Use tools like Postman or curl to interact with the endpoints.
 
 ## Examples
-- [click here for examples](./examples/0-routes.md)
+- [click here for examples](./examples/README.md)

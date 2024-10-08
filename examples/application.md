@@ -18,8 +18,7 @@ curl -X POST http://localhost:8080/app \
 	"containerPort": 8080
 }'
 ```
-
-
+**browse you deployment on url: ingress_ip/application_name**
 ## update an application
 ```
 curl -X PUT http://localhost:8080/app \

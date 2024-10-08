@@ -13,6 +13,7 @@
 
 ## Applications - [click here for request examples](./application.md)
 - `POST /app`: Create a new application (automatically creates a namespace, deployment, service, and ingress)
+**browse you deployment on url: ingress_ip/application_name**
 - `PUT /app`: Update an existing application
 
 ## Nodes

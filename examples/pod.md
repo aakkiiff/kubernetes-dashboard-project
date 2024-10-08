@@ -1,7 +1,3 @@
-### `namespaces.md`
-
-
-
 
 # Pods API Examples
 This file will provide examples for how to hit the pod routes:

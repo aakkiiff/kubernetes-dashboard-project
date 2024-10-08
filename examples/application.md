@@ -1,8 +1,3 @@
-### `namespaces.md`
-
-
-
-
 # Application API Examples
 This file will provide examples for how to hit the application routes:
 

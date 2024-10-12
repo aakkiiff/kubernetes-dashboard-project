@@ -1,0 +1,16 @@
+.home {
+    margin-left: 220px; /* To make room for the sidebar */
+    padding: 40px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .home-title {
+    font-size: 48px;
+    font-weight: bold;
+    color: #333;
+  }
+  

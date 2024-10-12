@@ -1,0 +1,37 @@
+.sidebar {
+    width: 220px;
+    height: 100vh; /* Full viewport height */
+    background-color: #ecf0f1;
+    padding-top: 20px; /* Space for title */
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto; /* Enable vertical scrolling */
+    border-right: 1px solid #bdc3c7;
+  }
+  
+  .sidebar-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px; /* Space below title */
+    color: #2c3e50;
+  }
+  
+  .sidebar-links {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar-links a {
+    text-decoration: none;
+    display: block;
+    padding: 15px 20px;
+    color: #2c3e50;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .sidebar-links a:hover {
+    background-color: #bdc3c7;
+    color: #2c3e50;
+  }
+  

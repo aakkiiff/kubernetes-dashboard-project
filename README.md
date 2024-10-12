@@ -24,12 +24,15 @@ cd kubernetes-dashboard-project/
 ```
 cd frontend
 docker build -t image_name .
+docker push image_name
+
 ```
 
 - build the backend  docker image
 ```
 cd backend
 docker build -t image_name .
+docker push image_name
 ```
 
 - update the image name from the frontend and backend manifest file

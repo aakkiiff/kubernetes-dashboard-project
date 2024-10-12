@@ -1,7 +1,7 @@
 
 # Kubernetes Dashboard Project
 
-  
+![enter image description here](./sample-website-assets/namespace.png)
 
 ## Overview
 
@@ -20,7 +20,7 @@ git clone https://github.com/aakkiiff/kubernetes-dashboard-project.git
 cd kubernetes-dashboard-project/
 ```
 
-- build the frontend  docker image
+- build and push the frontend  docker image
 ```
 cd frontend
 docker build -t image_name .
@@ -28,7 +28,7 @@ docker push image_name
 
 ```
 
-- build the backend  docker image
+- build and push the backend  docker image
 ```
 cd backend
 docker build -t image_name .

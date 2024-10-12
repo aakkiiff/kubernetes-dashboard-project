@@ -15,7 +15,7 @@ spec:
       serviceAccountName: go-dashboard-sa
       containers:
       - name: frontend-go
-        image: aakkiiff/k8s-dashfe:0.0.2
+        image: aakkiiff/k8s-dashfe:0.0.3
         ports:
         - containerPort: 3000
 

@@ -15,7 +15,7 @@ spec:
       serviceAccountName: go-dashboard-sa
       containers:
       - name: backend-go
-        image: aakkiiff/k8s-dashbe:0.0.2
+        image: aakkiiff/k8s-dashbe:0.0.3
         ports:
         - containerPort: 8080
 
